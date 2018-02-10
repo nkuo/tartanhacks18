@@ -1,11 +1,11 @@
 import threading
-from ui import run
+from ui import *
 from cloudloop2 import run2
 big_queue=queue.Queue()
 big_queue2=queue.Queue()
 
 def main():
-    ui_thread=threading.Thread(run(800,600))
+    ui_thread=threading.Thread(final())
     camera_thread=threading.Thread(run2())
     
     ui_thread.start()
