@@ -7,6 +7,7 @@ import numpy as np
 from PIL import ImageTk
 import PIL.Image
 import math
+from main import big_queue
 class contents(object):
     def __init__(self,contents,color="black"):
         self.contents=contents
@@ -38,34 +39,38 @@ class text(object):
     def draw(self,canvas,data):
         canvas.create_text(self.x,self.y,text=self.contents,font="Point %d"%(self.font),fill=self.color)
 
-def distance(t1, t2):
-    return ((t1[0]-t2[0])**2 + (t1[1]-t2[1])**2)**0.5
-    
-def adjustFont(t1, t2):
-    d = distance(t1, t2)
-    fontSize = 1.889*d - 64.45
-    return fontSize
 
-def modeAdjust(t1, t2):
-    d = distance(t1, t2)
-    if d < 50:
-        data.mode = "init"
-    elif d < 125:
-        data.fontSize = adjustFont(t1, t2)
-        data.flag1 = True
+
+def modeAdjust(s,bools):
+    n=-1
+    for i in range(-1,-8,-1):
+        if bools[i]==True:
+            n=i
+    if n==0:
+        data.flag1=True
     
-    elif d < (220+125)/2:
-        data.fontSize=adjustFont(t1,t2)
-        xValue = abs(t1[0]+t2[0])/2
-        if xValue < 65:
-            data.situation=1
-        elif xValue > 572:
-            data.situation=2
-        else:
-            data.situation=3
-        data.flag2=True
-    elif d<220:
-        pass
+    if s=="bag":
+        data.situation=2
+    if s=="bottle":
+        data.situation=1
+    if data.situation==1 and n==1:
+        data.flag3=True
+    if data.situation==1 and n!=1:
+        data.flag5=True
+    if data.situation==2 and n==2:
+        data.flag3=True
+    if data.situation==2 and n!=2:
+        data.flag5=True
+    if data.situation==2 and n==5:
+        data.flag4=True
+    if data.situation==2 and n!=5:
+        data.flag6=True
+    if data.situation==1 and n==4:
+        data.flag4=True
+    if data.situation==1 and n!=4:
+        data.flag6=True
+    
+    
         
 ####################################
 # customize these functions
@@ -81,13 +86,12 @@ def init(data):
     data.time=0
     data.situation=3
     data.speed=20
-    data.flag1=True
+    data.flag1=None
     data.flag2=None
     data.flag3=None
     data.flag4=None
     data.flag5=None
     data.flag6=None
-    
     bg3=PIL.Image.open("volcano.jpg")
     bg3=bg3.resize((800,600))
     data.bg3=ImageTk.PhotoImage(bg3)
@@ -100,6 +104,11 @@ def keyPressed(event, data):
     pass
 
 def timerFired(data):
+    if big_queue.get()!=None:
+        s=big_queue.get()
+    if big_queue2.get()!=None:
+        bools=big_queue2.get()
+    modeAdjust(s,bools)
     if data.mode=="init":
         data.c1.filt(data)
         data.time+=1
@@ -126,35 +135,37 @@ def timerFired(data):
         if data.time%5==0:
             data.speed*=-1
         data.t2.move(data.speed)
-    if data.flag2==True:
-        data.mode="near2"
-        data.time=0
-        if data.situation==1:
-            im2=PIL.Image.open("right_point.png")
-            im2=im2.resize((100,100))
-            data.im2=ImageTk.PhotoImage(im2)
-            im3=PIL.Image.open("bin.png")
-            im3=im3.resize((100,100))
-            data.im3=ImageTk.PhotoImage(im3)
-        elif data.situation==2:
-            im2=PIL.Image.open("right_point.png")
-            im2=im2.rotate(180)
-            im2=im2.resize((100,100))
-            im3=PIL.Image.open("bin.png")
-            im3=im3.resize((100,100))
-            data.im3=ImageTk.PhotoImage(im3)
-            data.im2=ImageTk.PhotoImage(im2)
-        else:
-            im2=PIL.Image.open("right_point.png")
-            im2=im2.rotate(270)
-            im2=im2.resize((100,100))
-            im3=PIL.Image.open("bin.png")
-            im3=im3.resize((100,100))
-            data.im3=ImageTk.PhotoImage(im3)
-            data.im2=ImageTk.PhotoImage(im2)
-        data.t3=text(data.width/2,data.height/2,"( >U< )",150)
-        data.c3=contents("Just a few steps! Make waste management great again!","black")
-        data.flag2=False
+        if data.time%30==0:
+            data.time=0
+            data.mode="near2"
+            if data.situation==1:
+                im2=PIL.Image.open("right_point.png")
+                im2=im2.resize((100,100))
+                data.im2=ImageTk.PhotoImage(im2)
+                im3=PIL.Image.open("bin.png")
+                im3=im3.resize((100,100))
+                data.im3=ImageTk.PhotoImage(im3)
+            elif data.situation==2:
+                im2=PIL.Image.open("right_point.png")
+                im2=im2.rotate(180)
+                im2=im2.resize((100,100))
+                im3=PIL.Image.open("bin.png")
+                im3=im3.resize((100,100))
+                data.im3=ImageTk.PhotoImage(im3)
+                data.im2=ImageTk.PhotoImage(im2)
+            else:
+                im2=PIL.Image.open("right_point.png")
+                im2=im2.rotate(270)
+                im2=im2.resize((100,100))
+                im3=PIL.Image.open("bin.png")
+                im3=im3.resize((100,100))
+                data.im3=ImageTk.PhotoImage(im3)
+                data.im2=ImageTk.PhotoImage(im2)
+            data.t3=text(data.width/2,data.height/2,"( >U< )",150)
+            data.c3=contents("Just a few steps! Make waste management great again!","black")
+            data.flag2=False
+    
+        
     if data.mode=="near2":
         data.c3.filt(data)
         data.time+=1
@@ -179,6 +190,7 @@ def timerFired(data):
         if data.time%5==0:
             data.speed*=-1
         data.t4.move(data.speed)
+       
     if data.flag4==True:
         data.mode="good2"
         data.time=0
@@ -212,6 +224,7 @@ def timerFired(data):
         if data.time%5==0:
             data.speed*=-1
         data.t6.move(data.speed)
+      
     if data.flag6==True:
         data.mode="not2"
         data.time=0
