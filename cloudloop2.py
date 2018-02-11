@@ -5,12 +5,13 @@ import cv2
 import io
 import os
 import time
-from main import big_queue
-from main import big_queue2
 
 # Imports the Google Cloud client library
 from google.cloud import vision
 from google.cloud.vision import types
+
+global_labels = ["",False, False, False, False, False, False, False]
+index = 0;
 
 def labelDecide(labels):
     if "product" in labels:
@@ -35,6 +36,7 @@ def drawSquare(b,frame):
 
 
 def run2():
+    print("CV")
     
     cap = cv2.VideoCapture(0)
     client = vision.ImageAnnotatorClient()
@@ -48,9 +50,6 @@ def run2():
     nearrightB = ((461,370),(632,453)) #len = 474-392
     bounds = [farmidB, midleftB, midmidB,
             midrightB, nearleftB, nearmidB, nearrightB]
-    
-    global_labels = ["",False, False, False, False, False, False, False]
-    index = 0;
 
 
     while (True):

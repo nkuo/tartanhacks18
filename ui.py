@@ -7,7 +7,7 @@ import numpy as np
 from PIL import ImageTk
 import PIL.Image
 import math
-from main import big_queue
+
 class contents(object):
     def __init__(self,contents,color="black"):
         self.contents=contents
@@ -41,7 +41,7 @@ class text(object):
 
 
 
-def modeAdjust(s,bools):
+def modeAdjust(s,bools, data):
     n=-1
     for i in range(-1,-8,-1):
         if bools[i]==True:
@@ -108,7 +108,7 @@ def timerFired(data):
         s=big_queue.get()
     if big_queue2.get()!=None:
         bools=big_queue2.get()
-    modeAdjust(s,bools)
+    modeAdjust(s,bools,data)
     if data.mode=="init":
         data.c1.filt(data)
         data.time+=1
@@ -337,5 +337,7 @@ def newrun(width=300, height=300):
     # and launch the app
     root.mainloop()  # blocks until window is closed
     print("bye!")
+
 def newfinal():
+    print("UI")
     newrun(800, 600)
