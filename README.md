@@ -13,4 +13,4 @@ Introducing.. **Tad**:
 Tad Uses OpenCV and Google Cloud Vision API to detect trash 
 on your hands and points you to the bin! 
 Tad gets happy when you throw into the right bin! But..
-if you approach the wrong bin.. it gets upset!
+if you approach the wrong bin.. Tad gets upset!
